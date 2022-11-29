@@ -1,0 +1,10 @@
+TODOLIST (Grande ligne):
+- creer un fichier serveur qui permet des connections, la mise en memoire de la database, le lancement du traitement des requetes
+- afficher le resultat des requetes
+- changer le handler de SIGUSR1 pour qu'il save tout sur le disque
+- creer le fichier client qui demande des inputs de l'utilisateur et envoie les requetes au serveur
+- modifier le fichier serveur pour qu'il creer des threads pour chaque clients
+- gerer les acces concurrent a la database
+- gerer les sorties standar du serveur : afficher les connexions et les potentiels problemes
+- creer les fichiers de monitoring
+- Faire le rapport
