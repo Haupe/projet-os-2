@@ -1,5 +1,5 @@
 TODOLIST (Grande ligne):
-- creer un fichier serveur qui permet des connections, la mise en memoire de la database, le lancement du traitement des requetes
+- modifier le fichier smalldb qui permet des connections, la mise en memoire de la database, le lancement du traitement des requetes
 - afficher le resultat des requetes
 - changer le handler de SIGUSR1 pour qu'il save tout sur le disque
 - creer le fichier client qui demande des inputs de l'utilisateur et envoie les requetes au serveur
