@@ -43,7 +43,7 @@ int main() {  // manque la gestion des deconnexions
   	bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 
 	// *********** mise en memoire de la database ********************
-	db_load(&database, "students.zip");
+	db_load(&database, "students.bin");
 
 	// ************ redclaration des handlers ********************
 	signal(SIGINT, sign_signit);
@@ -76,18 +76,10 @@ void *client(int socket){
 	char query[256];
 	int lu;
 	while ((lu = read(socket, query, 256)) > 0){
-		printf(" %s \n", query);
-		if(strstr(query, "insert")){
-			parse_and_execute_insert(stderr,&database, query);
-		} else if(strstr(query, "update")){
-			parse_and_execute_update(stderr,&database, query);
-		} else if(strstr(query, "delete")){
-			parse_and_execute_delete(stderr,&database, query);
-		} else if(strstr(query, "select")){
-			parse_and_execute_select(stderr,&database, query);
-		} else if(strstr(query, "exit")){
-			break;
-		}
+		printf("executing :%s \n", query);
+		std::string result;
+		result = parse_and_execute(stderr, &database, query);
+		write(socket, result.c_str(), 256);
 	}
 	printf("client disconnected \n");
 	close(socket);
@@ -102,7 +94,7 @@ void sign_signit(int sig){
 		}
 		close(server_fd);
 		db_save(&database);
-		printf("fermeture de la base de donne realise, bye bye ! \n");
+		printf("\nfermeture de la base de donne realise, bye bye ! \n");
 		exit(0);
 	}
 }

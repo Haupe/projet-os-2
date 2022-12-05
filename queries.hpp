@@ -2,34 +2,35 @@
 #define QUERIES_HPP
 
 #include <cstdio>
+#include <string>
 
 #include "db.hpp"
 
 // execute_* //////////////////////////////////////////////////////////////////
 
-void execute_select(FILE* fout, database_t* const db, const char* const field,
+std::string execute_select(FILE* fout, database_t* const db, const char* const field,
                     const char* const value);
 
-void execute_update(FILE* fout, database_t* const db, const char* const ffield,
+std::string execute_update(FILE* fout, database_t* const db, const char* const ffield,
                     const char* const fvalue, const char* const efield, const char* const evalue);
 
-void execute_insert(FILE* fout, database_t* const db, const char* const fname,
+std::string execute_insert(FILE* fout, database_t* const db, const char* const fname,
                     const char* const lname, const unsigned id, const char* const section,
                     const tm birthdate);
 
-void execute_dump(FILE* fout, database_t* const db);
+//void execute_dump(FILE* fout, database_t* const db);
 
 // parse_and_execute_* ////////////////////////////////////////////////////////
 
-void parse_and_execute_select(FILE* fout, database_t* db, const char* const query);
+std::string parse_and_execute_select(FILE* fout, database_t* db, const char* const query);
 
-void parse_and_execute_update(FILE* fout, database_t* db, const char* const query);
+std::string parse_and_execute_update(FILE* fout, database_t* db, const char* const query);
 
-void parse_and_execute_insert(FILE* fout, database_t* db, const char* const query);
+std::string parse_and_execute_insert(FILE* fout, database_t* db, const char* const query);
 
-void parse_and_execute_delete(FILE* fout, database_t* db, const char* const query);
+std::string parse_and_execute_delete(FILE* fout, database_t* db, const char* const query);
 
-void parse_and_execute(FILE* fout, database_t* db, const char* const query);
+std::string parse_and_execute(FILE* fout, database_t* db, const char* const query);
 
 // query_fail_* ///////////////////////////////////////////////////////////////
 

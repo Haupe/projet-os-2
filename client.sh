@@ -5,7 +5,7 @@ echo "connected"
 while true
 do
     read -r line
-    if ["$line" == "exit"]; then
+    if ["$line" == ""]; then
         break
     fi
     echo "$line" >&3
