@@ -27,7 +27,9 @@ void execute_select(int fout, database_t* const db, const char* const field,
       i++;
     }
   }
-  write(fout, std::string{std::to_string(i) + "student(s) selected \n"}.c_str(), 64);
+  char buffer[256] = "";
+  snprintf(buffer, 256, "%i student(s) selected \n", i);
+  write(fout, buffer, 256);
 }
 
 void execute_update(int fout, database_t* const db, const char* const ffield, const char* const fvalue, const char* const efield, const char* const evalue) {

@@ -39,8 +39,9 @@ int main(void) {
      i = 0;
      std::string result;
      while (read(sock, buffer, longueur - i) > -1) {
-        if (!strcmp(buffer, ""))
-            break;
+        /* if (!strcmp(buffer, ""))
+            break; */
+         printf("%s \n", buffer);
         result += buffer;
      }
      

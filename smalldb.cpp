@@ -57,7 +57,7 @@ int main() {  // manque la gestion des deconnexions
 
 
   	while(1){  // boucle dans laquelle le processus principale boucle pour permettre des connexions
-    	listen(server_fd, 3);
+    	listen(server_fd, 45);
     	size_t addrlen = sizeof(address);
     	int new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
 		printf("client connected \n");
