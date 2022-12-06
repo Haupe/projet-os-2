@@ -86,10 +86,12 @@ std::string parse_and_execute_select(FILE* fout, database_t* db, const char* con
   int  counter;
   if (sscanf(query, "select %31[^=]=%63s%n", ffield, fvalue, &counter) != 2) {
     query_fail_bad_format(fout, "select");
+    return "Query failed : Bad format";
   } else if (static_cast<unsigned>(counter) < strlen(query)) {
     query_fail_too_long(fout, "select");
+    return "Query failed : Query too long";
   } else {
-    execute_select(fout, db, ffield, fvalue);
+    return execute_select(fout, db, ffield, fvalue);
   }
 }
 
@@ -100,8 +102,10 @@ std::string parse_and_execute_update(FILE* fout, database_t* db, const char* con
   if (sscanf(query, "update %31[^=]=%63s set %31[^=]=%63s%n", ffield, fvalue, efield, evalue,
              &counter) != 4) {
     query_fail_bad_format(fout, "update");
+    return "Query failed : Bad format";
   } else if (static_cast<unsigned>(counter) < strlen(query)) {
     query_fail_too_long(fout, "update");
+    return "Query failed : Query too long";
   } else {
     return execute_update(fout, db, ffield, fvalue, efield, evalue);
   }
@@ -114,8 +118,10 @@ std::string parse_and_execute_insert(FILE* fout, database_t* db, const char* con
   int       counter;
   if (sscanf(query, "insert %63s %63s %u %63s %10s%n", fname, lname, &id, section, date, &counter) != 5 || strptime(date, "%d/%m/%Y", &birthdate) == NULL) {
     query_fail_bad_format(fout, "insert");
+    return "Query failed bad format";
   } else if (static_cast<unsigned>(counter) < strlen(query)) {
     query_fail_too_long(fout, "insert");
+    return "Query failed, query too long" + std::to_string(counter) + std::to_string(strlen(query));
   } else {
     return execute_insert(fout, db, fname, lname, id, section, birthdate);
   }
@@ -126,8 +132,10 @@ std::string parse_and_execute_delete(FILE* fout, database_t* db, const char* con
   int counter;
   if (sscanf(query, "delete %31[^=]=%63s%n", ffield, fvalue, &counter) != 2) {
     query_fail_bad_format(fout, "delete");
+    return "Query failed : Bad format";
   } else if (static_cast<unsigned>(counter) < strlen(query)) {
     query_fail_too_long(fout, "delete");
+    return "Query failed : Query too long";
   } else {
     return execute_delete(fout, db, ffield, fvalue);
   }

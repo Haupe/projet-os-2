@@ -1,6 +1,5 @@
 TODOLIST (Grande ligne):
-- modifier le fichier smalldb qui permet des connections, la mise en memoire de la database, le lancement du traitement des requetes (en cours)
-- modifier le fichier queries pour recuperer le resultat des requetes et afficher le resultat des requetes
+- modifier le fichier queries pour recuperer le resultat des requetes et afficher le resultat des requetes (v1 faite, il faut que ce soit mieux fait)
 - gerer les acces concurrent a la database
 - gerer les sorties standar du serveur : afficher les connexions et les potentiels problemes
 - creer les fichiers de monitoring
@@ -8,4 +7,4 @@ TODOLIST (Grande ligne):
 
 PROBLEM :
 - Je sais pas trop comment recuperer les resultas des query
-- Le client a un comportement tres etrange 
+- La base de donné à l'air de plutot bien marcher, mais le client ne recoit pas toujours tous les resultats.

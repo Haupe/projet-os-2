@@ -71,6 +71,7 @@ int main() {  // manque la gestion des deconnexions
   	return 0;
 }
 
+// *************** fonction executer par les threads fils *********************************
 
 void *client(int socket){
 	char query[256];
@@ -79,6 +80,7 @@ void *client(int socket){
 		printf("executing :%s \n", query);
 		std::string result;
 		result = parse_and_execute(stderr, &database, query);
+		printf("result : %s \n", result.c_str());
 		write(socket, result.c_str(), 256);
 	}
 	printf("client disconnected \n");
@@ -86,6 +88,8 @@ void *client(int socket){
 	return nullptr;
 }
 
+
+// ************************ handler de signaux *********************************
 void sign_signit(int sig){
 	if(sig == SIGINT){
 		for(auto &thread_fd: thread_list){
