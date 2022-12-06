@@ -78,10 +78,7 @@ void *client(int socket){
 	int lu;
 	while ((lu = read(socket, query, 256)) > 0){
 		printf("executing :%s \n", query);
-		std::string result;
-		result = parse_and_execute(stderr, &database, query);
-		printf("result : %s \n", result.c_str());
-		write(socket, result.c_str(), 256);
+		parse_and_execute(socket, &database, query);
 	}
 	printf("client disconnected \n");
 	close(socket);

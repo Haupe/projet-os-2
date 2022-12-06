@@ -26,9 +26,9 @@ int main(void) {
 
   printf("Your're connected to the database !\nPlease enter a query :\n>");
   
-  char buffer[1024];
+  char buffer[256];
   int longueur, i, ret;
-  while (fgets(buffer, 1024, stdin) != NULL) {
+  while (fgets(buffer, 256, stdin) != NULL) {
      longueur = strlen(buffer) + 1;
      printf("Envoi...\n");
       std::string query = buffer; 
@@ -37,12 +37,14 @@ int main(void) {
 		}
      write(sock, query.c_str(), strlen(buffer) + 1);
      i = 0;
-     while (i < longueur) {
-        ret = read(sock, buffer, longueur - i);
-        i += ret;
+     std::string result;
+     while (read(sock, buffer, longueur - i) > -1) {
+        if (!strcmp(buffer, ""))
+            break;
+        result += buffer;
      }
      
-     printf("Recu : %s\n>", buffer);
+     printf("Recu : %s\n>", result.c_str());
   }
   
   close(sock);

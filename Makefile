@@ -21,4 +21,4 @@ client: client.cpp
 
 .PHONY: clean
 clean:
-	-rm *.o
+	-rm *.o & rm client
