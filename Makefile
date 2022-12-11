@@ -1,13 +1,13 @@
-CXXFLAGS+=-std=c++17 -g -Wall -Wextra -Wpedantic -D_GNU_SOURCE -Werror=all
+CXXFLAGS+=-std=c++17 -g -Wall -Wextra -Wpedantic -D_GNU_SOURCE 
 #CXX=g++
 LDLIBS+=-lpthread
 SOURCES = $(wildcard *.cpp */*.cpp)
 HEADERS = $(wildcard *.hpp */*.hpp)
 
-OBJ=db.o student.o
+OBJ=db.o student.o queries.o
 
 .PHONY: main
-main: smalldb check run
+main: smalldb client
 
 smalldb: smalldb.cpp ${OBJ}
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LOADLIBES) $(LDLIBS)
@@ -15,6 +15,10 @@ smalldb: smalldb.cpp ${OBJ}
 %.o: %.cpp %.hpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^
 
+.PHONY: client
+client: client.cpp 
+	$(CXX) $(LDFLAGS) $^ -o $@ $(LOADLIBES) $(LDLIBS)
+
 .PHONY: clean
 clean:
-	-rm *.o
+	-rm *.o & rm client
