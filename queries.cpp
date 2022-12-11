@@ -38,7 +38,7 @@ void execute_select(int fout, database_t* const db, const char* const field,
   char puffer[256]="";
   snprintf(puffer, 256, "%i student(s) selected \n", i);
   result += puffer;
-  strcpy(puffer, result.c_str());
+  //strcpy(puffer, result.c_str());
   write(fout, result.c_str(), result.size());
 
   /* char buffer[256] = "";
@@ -65,9 +65,11 @@ void execute_update(int fout, database_t* const db, const char* const ffield, co
       i ++;
     }
   }
+  std::string result = "";
   char buffer[256] = "";
   snprintf(buffer, 256, "%i student(s) updated \n", i);
-  write(fout, buffer, 256);
+  result += buffer;
+  write(fout, result.c_str(), result.size());
 }
 
 void execute_insert(int fout, database_t* const db, const char* const fname,
@@ -81,9 +83,11 @@ void execute_insert(int fout, database_t* const db, const char* const fname,
   snprintf(s->section, sizeof(s->section), "%s", section);
   s->birthdate = birthdate;
   
+  std::string result = "";
   char buffer[256] = "";
   student_to_str(buffer, s, 256);
-  write(fout,buffer, 256);
+  result += buffer;
+  write(fout,result.c_str(), result.size());
 }
 
 void execute_delete(int fout, database_t* const db, const char* const field,
@@ -181,34 +185,43 @@ void parse_and_execute(int fout, database_t* db, const char* const query) {
 
 void query_fail_bad_query_type(int const fout) {
   printf("Query failed bad query type\n");
-  write(fout, "Query failed bad query type\0", 64);
+  std::string error = "Query failed bad query type \n";
+  write(fout, error.c_str(), error.size());
 }
 
 void query_fail_bad_format(int const fout, const char * const query_type) {
   char buffer[256] = "";
-  snprintf(buffer, 256, "Query %s failed: bad format ", query_type);
+  std::string error = "";
+  snprintf(buffer, 256, "Query %s failed: bad format \n", query_type);
   printf("%s \n", buffer);
-  write(fout, buffer, 256);
+  error += buffer;
+  write(fout, error.c_str(), error.size());
 }
 
 void query_fail_too_long(int const fout, const char * const query_type) {
   char buffer[256] = "";
-  snprintf(buffer, 256, "Query %s failed: query too long \0", query_type);
+  std::string error = "";
+  snprintf(buffer, 256, "Query %s failed: query too long \n", query_type);
   printf("%s \n", buffer);
-  write(fout, buffer, 256);
+  error += buffer;
+  write(fout, error.c_str(), error.size());
 }
 
 void query_fail_bad_filter(int const fout, const char* const field, const char* const filter) {
   char buffer[256] = "";
-  snprintf(buffer, 256, "Query failed bad filter : field = %s, filter = %s \0", field, filter);
+  std::string error = "";
+  snprintf(buffer, 256, "Query failed bad filter : field = %s, filter = %s \n", field, filter);
   printf("%s \n", buffer);
-  write(fout, buffer, 256);
+  error += buffer;
+  write(fout, error.c_str(), error.size());
 }
 
 void query_fail_bad_update(int const fout, const char* const field, const char* const filter) {
   char buffer[256] = "";
-  snprintf(buffer, 256, "Query failed bad update : field = %s, filter = %s \0", field, filter);
+  std::string error = "";
+  snprintf(buffer, 256, "Query failed bad update : field = %s, filter = %s \n", field, filter);
   printf("%s \n", buffer);
-  write(fout, buffer, 256);
+  error += buffer;
+  write(fout, error.c_str(), error.size());
 }
 

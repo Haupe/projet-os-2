@@ -44,9 +44,18 @@ int main(void) {
       i = 0;
       std::string result = "";
       for(int i=0; i<256; i++ ){buffer[i]=0;}
+      int counter = 0;
+      std::string save = "not first time";
       while (result.find("~") == std::string::npos) {
+         /* if(result == save){ // pour etre safe
+            counter ++;
+            if (counter > 2)
+               break;
+         } */
+         save = result;
          result += lecture(longueur, buffer, sock);
          //printf("%s \n", result.c_str());
+
       }
       printf("Recu : %s\n>", result.c_str());
    }
