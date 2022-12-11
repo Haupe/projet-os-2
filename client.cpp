@@ -6,7 +6,9 @@
 
 #include <signal.h>
 #include <string>
+#include <iostream>
 
+std::string lecture(int longueur, char* buffer, int sock);
 
 int main(void) {
   // Permet que write() retourne 0 en cas de réception
@@ -26,28 +28,40 @@ int main(void) {
 
   printf("Your're connected to the database !\nPlease enter a query :\n>");
   
-  char buffer[256];
-  int longueur, i, ret;
-  while (fgets(buffer, 256, stdin) != NULL) {
-     longueur = strlen(buffer) + 1;
-     printf("Envoi...\n");
-      std::string query = buffer; 
-     if(static_cast<std::string>(query).find("\n")){
+   char buffer[256] = "";
+   std::string query="";
+   int longueur, i, ret;
+   while (fgets(buffer, 256, stdin) != NULL) {
+      longueur = strlen(buffer) + 1;
+      query = buffer;
+      printf("Envoi...\n");
+      if(static_cast<std::string>(query).find("\n")){
+         
 			query.erase(query.length()-1);
 		}
-     write(sock, query.c_str(), strlen(buffer) + 1);
-     i = 0;
-     std::string result;
-     while (read(sock, buffer, longueur - i) > -1) {
-        /* if (!strcmp(buffer, ""))
-            break; */
-         printf("%s \n", buffer);
-        result += buffer;
-     }
-     
-     printf("Recu : %s\n>", result.c_str());
-  }
+      //printf("here\n");
+      write(sock, query.c_str(), strlen(buffer) + 1);
+      i = 0;
+      std::string result = "";
+      for(int i=0; i<256; i++ ){buffer[i]=0;}
+      while (result.find("~") == std::string::npos) {
+         result += lecture(longueur, buffer, sock);
+         //printf("%s \n", result.c_str());
+      }
+      printf("Recu : %s\n>", result.c_str());
+   }
   
   close(sock);
   return 0;
+}
+
+std::string lecture(int longueur, char* buffer, int sock){
+   int ret, i=0;
+   std::string result="";
+   while (i < longueur) {
+      ret = read(sock, buffer, longueur-1);
+      result += buffer;
+      i += ret;
+   }
+   return result.c_str();
 }

@@ -40,7 +40,7 @@ int main() {  // manque la gestion des deconnexions
   	address.sin_addr.s_addr = INADDR_ANY;
   	address.sin_port = htons(28772);
 
-  	bind(server_fd, (struct sockaddr *)&address, sizeof(address));
+  	::bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 
 	// *********** mise en memoire de la database ********************
 	db_load(&database, "students.bin");
@@ -74,11 +74,14 @@ int main() {  // manque la gestion des deconnexions
 // *************** fonction executer par les threads fils *********************************
 
 void *client(int socket){
-	char query[256];
+	char query[256] = "";
+	char end[256] = "~";
 	int lu;
 	while ((lu = read(socket, query, 256)) > 0){
+		for(int i = lu; i<256; i++){query[i] = 0;}
 		printf("executing :%s \n", query);
 		parse_and_execute(socket, &database, query);
+		write(socket, end, 256);
 	}
 	printf("client disconnected \n");
 	close(socket);

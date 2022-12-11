@@ -2,16 +2,14 @@
 
 exec 3<>/dev/tcp/127.0.0.1/28772
 echo "connected"
-while true
-do
-    read -r line
-    #if [$line == ""]; then
-    #    break
-    #fi
-    echo "$line" >&3
-    read -r reponse <&3
-    echo "Query executed"
-    echo "Réponse : $reponse"
+while read -r line
+do  
+    echo -n "$line" >&3
+    #reponse=$(head -z <&3)
+    reponse=$(head -z <&3)
+    echo "Query executed :"
+    echo "$reponse"
+    
 done
 
 exec 3<&-
