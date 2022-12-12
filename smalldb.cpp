@@ -8,21 +8,40 @@
 #include <signal.h>
 #include <pthread.h>
 #include <vector>
+#include <exception>
 
 #include "db.hpp"
 #include "queries.hpp"
 
+//initialisation des structures
 struct thread_fd{
 	pthread_t thread;
 	int fd;
 };
 
-database_t database;  // en global parce qu'il faut que les threads y aie acces, pas trouver de meilleur solution
+struct QueryMutex{
+	pthread_mutex_t new_access=PTHREAD_MUTEX_INITIALIZER ;
+	pthread_mutex_t write_access=PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_t reader_registration=PTHREAD_MUTEX_INITIALIZER;
+	int readers_c = 0;
+};
+
+struct Thread_arg{
+	QueryMutex *query_mutex;
+	int socket;
+};
+
+// initialisation des variables globales
+database_t database;  
 std::vector<thread_fd> thread_list;
 int server_fd;
 
+// definition des prototypes
+void reading_error(int socket);
+void writing_error(int socket);
 
-void *client(int socket);
+int good_execution(Thread_arg *thread_arg, char* query);
+void *client(Thread_arg* thread_arg);
 
 // les handlers des signals
 void sign_signit(int sig); 
@@ -49,6 +68,12 @@ int main() {  // manque la gestion des deconnexions
 	signal(SIGINT, sign_signit);
 	signal(SIGUSR1, sign_sigusr1);
 
+	// ************ initialisation des threads_mutex *************
+	QueryMutex query_mutex;
+	pthread_mutex_unlock(&query_mutex.new_access);	
+	pthread_mutex_unlock(&query_mutex.write_access);	
+	pthread_mutex_unlock(&query_mutex.reader_registration);
+
 	// *********** creation du set de signal a bloquer pour les threads ******
 	sigset_t set;
 	sigemptyset(&set);
@@ -60,31 +85,96 @@ int main() {  // manque la gestion des deconnexions
     	listen(server_fd, 45);
     	size_t addrlen = sizeof(address);
     	int new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
-		printf("client connected \n");
+		printf("new client connected (%i)\n", new_socket);
+
+		Thread_arg thread_arg ={&query_mutex, new_socket};
 
 		thread_list.push_back(thread_fd{pthread_t{}, new_socket});
 
 		pthread_sigmask(SIG_BLOCK, &set, NULL);
-		pthread_create(&thread_list.back().thread, NULL, (void*(*)(void *)) client, (void *)new_socket);
+		pthread_create(&thread_list.back().thread, NULL, (void*(*)(void *)) client, (void *)&thread_arg);
 		pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 	}
   	return 0;
 }
 
+// ************** fonction d'erreur **************************
+void reading_error(int socket){
+	printf("error while reading from client %i : closing socket and thread \n", socket);
+	close(socket);
+}
+
+void writing_error(int socket){
+	printf("error while sending to client %i  disconnecting client \n", socket);
+	close(socket);
+}
+
+
 // *************** fonction executer par les threads fils *********************************
 
-void *client(int socket){
+int good_execution(Thread_arg *thread_arg, char* query) {
+	int result = 0;
+
+	pthread_mutex_lock(&thread_arg->query_mutex->new_access);
+	pthread_mutex_lock(&thread_arg->query_mutex->write_access);
+	pthread_mutex_unlock(&thread_arg->query_mutex->new_access);
+	if (strncmp("update", query, sizeof("update")-1) == 0) {
+    	parse_and_execute_update(thread_arg->socket, &database, query);
+		result = 1;
+  	} else if (strncmp("insert", query, sizeof("insert")-1) == 0) {
+    	parse_and_execute_insert(thread_arg->socket, &database, query);
+		result = 1;
+  	} else if (strncmp("delete", query, sizeof("delete")-1) == 0) {
+    	parse_and_execute_delete(thread_arg->socket, &database, query);
+		result = 1;
+	}
+	pthread_mutex_unlock(&thread_arg->query_mutex->write_access);
+	pthread_mutex_lock(&thread_arg->query_mutex->new_access);
+	pthread_mutex_lock(&thread_arg->query_mutex->reader_registration);
+	if (thread_arg->query_mutex->readers_c == 0){
+		pthread_mutex_lock(&thread_arg->query_mutex->write_access);
+	}
+	thread_arg->query_mutex->readers_c++;
+	pthread_mutex_unlock(&thread_arg->query_mutex->new_access);
+	pthread_mutex_unlock(&thread_arg->query_mutex->reader_registration);
+	if (strncmp("select", query, sizeof("select")-1) == 0) {
+
+		parse_and_execute_select(thread_arg->socket, &database, query);
+		result = 1;
+	}
+	pthread_mutex_lock(&thread_arg->query_mutex->reader_registration);
+	thread_arg->query_mutex->readers_c --;
+	if (thread_arg->query_mutex->readers_c == 0)
+		pthread_mutex_unlock(&thread_arg->query_mutex->write_access);
+	pthread_mutex_unlock(&thread_arg->query_mutex->reader_registration);
+	return result;
+}
+
+
+void *client(Thread_arg *thread_arg){
 	char query[256] = "";
 	char end[256] = "~";
 	int lu;
-	while ((lu = read(socket, query, 256)) > 0){
+	while ((lu = read(thread_arg->socket, query, 256))){
+		if (lu == -1){
+			reading_error(thread_arg->socket);
+			return nullptr;
+		}else if(lu == 2)
+			break;
 		for(int i = lu; i<256; i++){query[i] = 0;}
 		printf("executing :%s \n", query);
-		parse_and_execute(socket, &database, query);
-		write(socket, end, 256);
+
+		if(good_execution(thread_arg, query)==0){
+			query_fail_bad_query_type(thread_arg->socket);
+		}
+
+		if(write(thread_arg->socket, end, 256) == -1){
+			writing_error(thread_arg->socket);
+			return nullptr;
+		}
 	}
-	printf("client disconnected \n");
-	close(socket);
+	printf("client disconnected %i (normal) : closing thread and socket \n", thread_arg->socket);
+	close(thread_arg->socket);
 	return nullptr;
 }
 

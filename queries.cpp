@@ -29,22 +29,13 @@ void execute_select(int fout, database_t* const db, const char* const field,
       result += buffer;
       result += "\n";
       i++;
-      /* write(fout , buffer, 256);
-      
-      printf("here : \n");
-      printf("%s \n", buffer); */
     }
   }
   char puffer[256]="";
   snprintf(puffer, 256, "%i student(s) selected \n", i);
   result += puffer;
-  //strcpy(puffer, result.c_str());
   write(fout, result.c_str(), result.size());
 
-  /* char buffer[256] = "";
-  snprintf(buffer, 256, "%i student(s) selected \0", i);
-  write(fout, buffer, 256);
-  printf("%s \n", buffer); */
 }
 
 void execute_update(int fout, database_t* const db, const char* const ffield, const char* const fvalue, const char* const efield, const char* const evalue) {
@@ -100,14 +91,19 @@ void execute_delete(int fout, database_t* const db, const char* const field,
 
   char buffer[256] = ""; 
   std::string result = "";
+  int i=0;
   for (const student_t& s : db->data) {
     if (predicate(s)) {
       student_to_str(buffer, &s, 256);
       result += buffer;
       result += "\n";
+      i ++;
     }
   }
-  write(fout , result.c_str(), result.size());
+  char puffer[256] = "";
+  snprintf(puffer, 256, "%i student(s) updated \n", i);
+  result += puffer;
+  write(fout, result.c_str(), result.size());
   auto new_end = remove_if(db->data.begin(), db->data.end(), predicate);
   db->data.erase(new_end, db->data.end());
   

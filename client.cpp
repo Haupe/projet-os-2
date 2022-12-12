@@ -26,15 +26,18 @@ int main(void) {
 
   connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
-  printf("Your're connected to the database !\nPlease enter a query :\n>");
+  //printf("Your're connected to the database !\nPlease enter a query :\n>");
   
    char buffer[256] = "";
    std::string query="";
    int longueur, i, ret;
    while (fgets(buffer, 256, stdin) != NULL) {
+      if (strcmp(buffer, "")){
+         break;
+      }
       longueur = strlen(buffer) + 1;
       query = buffer;
-      printf("Envoi...\n");
+      //printf("Envoi...\n");
       if(static_cast<std::string>(query).find("\n")){
          
 			query.erase(query.length()-1);
@@ -57,7 +60,8 @@ int main(void) {
          //printf("%s \n", result.c_str());
 
       }
-      printf("Recu : %s\n>", result.c_str());
+      //printf("Recu : %s\n>", result.c_str());
+      printf("%s\n>", result.c_str());
    }
   
   close(sock);

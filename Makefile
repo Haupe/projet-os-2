@@ -7,7 +7,7 @@ HEADERS = $(wildcard *.hpp */*.hpp)
 OBJ=db.o student.o queries.o
 
 .PHONY: main
-main: smalldb client
+main: smalldb sdbsh
 
 smalldb: smalldb.cpp ${OBJ}
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LOADLIBES) $(LDLIBS)
@@ -16,9 +16,9 @@ smalldb: smalldb.cpp ${OBJ}
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^
 
 .PHONY: client
-client: client.cpp 
+sdbsh: client.cpp 
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LOADLIBES) $(LDLIBS)
 
 .PHONY: clean
 clean:
-	-rm *.o & rm client
+	-rm *.o & rm sdbsh
