@@ -32,7 +32,7 @@ int main(void) {
    std::string query="";
    int longueur, i, ret;
    while (fgets(buffer, 256, stdin) != NULL) {
-      if (strcmp(buffer, "")){
+      if (!strcmp(buffer, "")){
          break;
       }
       longueur = strlen(buffer) + 1;
