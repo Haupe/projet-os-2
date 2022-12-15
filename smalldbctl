@@ -1,0 +1,51 @@
+#!/bin/bash
+
+
+
+sync(){
+	pid=$(pidof smalldb)
+	kill -SIGUSR1 "$pid" 
+	echo "Done"	
+}
+
+stop(){
+    pid=$(pidof smalldb)
+    kill -SIGINT $pid
+    echo "Done"
+}
+
+
+list(){
+    for a in $(ss --no-header -Ontp4 'sport = :28772'); do 
+    if [[ $a == *"28772"* ]] ; 
+    then
+        IFS=":" read -ra ADDR <<< $a
+        echo "${ADDR[0]}"
+    fi
+    done
+}
+
+
+#receive all argument, check it and call the appropriate function
+parse(){
+	if [ $# -lt 1 ] ; then
+		echo "./monitoring requires at least one argument" 1>&2
+		exit
+	fi
+
+	case "$1" in
+		sync)
+			sync
+			;;
+
+		stop)
+			stop 
+			;;
+
+        list)
+			list
+			;;
+	esac
+}
+
+parse "$@"

@@ -47,7 +47,7 @@ void *client(Thread_arg* thread_arg);
 void sign_signit(int sig); 
 void sign_sigusr1(int sig);
 
-int main() {  // manque la gestion des deconnexions
+int main(int argc, char *argv[]) {  
 	// *********** creation du socket pour permettre des connexions ********************
   	server_fd = socket(AF_INET, SOCK_STREAM, 0);
 
@@ -62,9 +62,14 @@ int main() {  // manque la gestion des deconnexions
   	::bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 
 	// *********** mise en memoire de la database ********************
-	db_load(&database, "students.bin");
+	if (argc == 2){
+		db_load(&database, argv[1]);
+	}else{
+		db_load(&database, "students.bin");
+	}
 
 	// ************ redclaration des handlers ********************
+	printf("%i\n", getpid());
 	signal(SIGINT, sign_signit);
 	signal(SIGUSR1, sign_sigusr1);
 
@@ -87,12 +92,12 @@ int main() {  // manque la gestion des deconnexions
     	int new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
 		printf("new client connected (%i)\n", new_socket);
 
-		Thread_arg thread_arg ={&query_mutex, new_socket};
+		Thread_arg* thread_arg =new Thread_arg{&query_mutex, new_socket};
 
 		thread_list.push_back(thread_fd{pthread_t{}, new_socket});
 
 		pthread_sigmask(SIG_BLOCK, &set, NULL);
-		pthread_create(&thread_list.back().thread, NULL, (void*(*)(void *)) client, (void *)&thread_arg);
+		pthread_create(&thread_list.back().thread, NULL, (void*(*)(void *)) client, (void *)thread_arg);
 		pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 	}
   	return 0;
@@ -153,7 +158,7 @@ int good_execution(Thread_arg *thread_arg, char* query) {
 
 void *client(Thread_arg *thread_arg){
 	char query[256] = "";
-	char end[256] = "~";
+	char end[512] = "~";
 	int lu;
 	while ((lu = read(thread_arg->socket, query, 256))){
 		if (lu == -1){
@@ -168,7 +173,7 @@ void *client(Thread_arg *thread_arg){
 			query_fail_bad_query_type(thread_arg->socket);
 		}
 
-		if(write(thread_arg->socket, end, 256) == -1){
+		if(write(thread_arg->socket, end, 512) == -1){
 			writing_error(thread_arg->socket);
 			return nullptr;
 		}
@@ -196,6 +201,7 @@ void sign_sigusr1(int sig){
 	if(sig == SIGUSR1){
 		db_save(&database);
 	}
+	printf("Database saved \n");
 }
 
 

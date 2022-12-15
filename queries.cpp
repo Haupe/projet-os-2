@@ -23,15 +23,16 @@ void execute_select(int fout, database_t* const db, const char* const field,
   char buffer[256] = ""; 
   for (const student_t& s : db->data) {
     if (predicate(s)) {
-      
-      
+      result="";
       student_to_str(buffer, &s, 256);
       result += buffer;
       result += "\n";
       i++;
+      write(fout, result.c_str(), result.size());
     }
   }
   char puffer[256]="";
+  result = "";
   snprintf(puffer, 256, "%i student(s) selected \n", i);
   result += puffer;
   write(fout, result.c_str(), result.size());
@@ -101,7 +102,7 @@ void execute_delete(int fout, database_t* const db, const char* const field,
     }
   }
   char puffer[256] = "";
-  snprintf(puffer, 256, "%i student(s) updated \n", i);
+  snprintf(puffer, 256, "%i student(s) deleted \n", i);
   result += puffer;
   write(fout, result.c_str(), result.size());
   auto new_end = remove_if(db->data.begin(), db->data.end(), predicate);

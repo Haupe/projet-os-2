@@ -10,7 +10,7 @@
 
 std::string lecture(int longueur, char* buffer, int sock);
 
-int main(void) {
+int main(int argc, char* argv[]) {
   // Permet que write() retourne 0 en cas de réception
   // du signal SIGPIPE.
   signal(SIGPIPE, SIG_IGN);
@@ -22,20 +22,23 @@ int main(void) {
   serv_addr.sin_port = htons(28772);
 
   // Conversion de string vers IPv4 ou IPv6 en binaire
-  inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr);
+  if (argc == 2) {
+   inet_pton(AF_INET, argv[1], &serv_addr.sin_addr);
+  }else
+   inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr);
 
   connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
   //printf("Your're connected to the database !\nPlease enter a query :\n>");
   
-   char buffer[256] = "";
+   char buffer[512] = "";
    std::string query="";
    int longueur, i, ret;
-   while (fgets(buffer, 256, stdin) != NULL) {
+   while (fgets(buffer, 512, stdin) != NULL) {
       if (!strcmp(buffer, "")){
          break;
       }
-      longueur = strlen(buffer) + 1;
+      longueur = 512;
       query = buffer;
       //printf("Envoi...\n");
       if(static_cast<std::string>(query).find("\n")){
@@ -46,22 +49,14 @@ int main(void) {
       write(sock, query.c_str(), strlen(buffer) + 1);
       i = 0;
       std::string result = "";
-      for(int i=0; i<256; i++ ){buffer[i]=0;}
       int counter = 0;
-      std::string save = "not first time";
       while (result.find("~") == std::string::npos) {
-         /* if(result == save){ // pour etre safe
-            counter ++;
-            if (counter > 2)
-               break;
-         } */
-         save = result;
-         result += lecture(longueur, buffer, sock);
-         //printf("%s \n", result.c_str());
-
+         for(int i=0; i<512; i++ ){buffer[i]=0;}
+         result = lecture(longueur, buffer, sock);
+         printf("%s \n", result.c_str());
       }
       //printf("Recu : %s\n>", result.c_str());
-      printf("%s\n>", result.c_str());
+      printf("\n>");
    }
   
   close(sock);
