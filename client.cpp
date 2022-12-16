@@ -16,7 +16,11 @@ int main(int argc, char* argv[]) {
    // du signal SIGPIPE.
    signal(SIGPIPE, SIG_IGN);
   
-   int sock = socket(AF_INET, SOCK_STREAM, 0);
+   int sock =0;
+   if((sock=socket(AF_INET, SOCK_STREAM, 0)) == -1){
+      perror("Unable to open a socket\n");
+      exit(0);
+   }
 
    struct sockaddr_in serv_addr;
    serv_addr.sin_family = AF_INET;
@@ -31,7 +35,10 @@ int main(int argc, char* argv[]) {
 
 
    // connect etablis la connexion avec le server
-   connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
+   if(connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr)) == -1){
+      perror("unable to connect to a server\n");
+      exit(0);
+   }
 
    interact(sock);
   
@@ -70,7 +77,7 @@ void interact(int sock){
          }
          printf("%s \n", result.c_str());
       }
-      printf("\n>");
+      printf(">");
    }
 }
 

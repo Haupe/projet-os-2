@@ -1,3 +1,5 @@
+#define STRING_SIZE 256
+
 #include "queries.hpp"
 
 #include <string>
@@ -20,20 +22,19 @@ void execute_select(int fout, database_t* const db, const char* const field,
   }
   int i = 0;
   std::string result = "";
-  char buffer[256] = ""; 
+  char buffer[STRING_SIZE] = ""; 
   for (const student_t& s : db->data) {
     if (predicate(s)) {
-      result="";
-      student_to_str(buffer, &s, 256);
-      result += buffer;
+      student_to_str(buffer, &s, STRING_SIZE);
+      result = buffer;
       result += "\n";
       i++;
       write(fout, result.c_str(), result.size());
     }
   }
-  char puffer[256]="";
+  char puffer[STRING_SIZE]="";
   result = "";
-  snprintf(puffer, 256, "%i student(s) selected \n", i);
+  snprintf(puffer, STRING_SIZE, "%i student(s) selected \n", i);
   result += puffer;
   write(fout, result.c_str(), result.size());
 
@@ -58,8 +59,8 @@ void execute_update(int fout, database_t* const db, const char* const ffield, co
     }
   }
   std::string result = "";
-  char buffer[256] = "";
-  snprintf(buffer, 256, "%i student(s) updated \n", i);
+  char buffer[STRING_SIZE] = "";
+  snprintf(buffer, STRING_SIZE, "%i student(s) updated \n", i);
   result += buffer;
   write(fout, result.c_str(), result.size());
 }
@@ -76,8 +77,8 @@ void execute_insert(int fout, database_t* const db, const char* const fname,
   s->birthdate = birthdate;
   
   std::string result = "";
-  char buffer[256] = "";
-  student_to_str(buffer, s, 256);
+  char buffer[STRING_SIZE] = "";
+  student_to_str(buffer, s, STRING_SIZE);
   result += buffer;
   write(fout,result.c_str(), result.size());
 }
@@ -90,20 +91,21 @@ void execute_delete(int fout, database_t* const db, const char* const field,
     return;
   }
 
-  char buffer[256] = ""; 
+  char buffer[STRING_SIZE] = ""; 
   std::string result = "";
   int i=0;
   for (const student_t& s : db->data) {
     if (predicate(s)) {
-      student_to_str(buffer, &s, 256);
-      result += buffer;
+      student_to_str(buffer, &s, STRING_SIZE);
+      result = buffer;
       result += "\n";
       i ++;
+      write(fout, result.c_str(), result.size());
     }
   }
-  char puffer[256] = "";
-  snprintf(puffer, 256, "%i student(s) deleted \n", i);
-  result += puffer;
+  char puffer[STRING_SIZE] = "";
+  snprintf(puffer, STRING_SIZE, "%i student(s) deleted \n", i);
+  result = puffer;
   write(fout, result.c_str(), result.size());
   auto new_end = remove_if(db->data.begin(), db->data.end(), predicate);
   db->data.erase(new_end, db->data.end());
@@ -187,36 +189,36 @@ void query_fail_bad_query_type(int const fout) {
 }
 
 void query_fail_bad_format(int const fout, const char * const query_type) {
-  char buffer[256] = "";
+  char buffer[STRING_SIZE] = "";
   std::string error = "";
-  snprintf(buffer, 256, "Query %s failed: bad format \n", query_type);
+  snprintf(buffer, STRING_SIZE, "Query %s failed: bad format \n", query_type);
   printf("%s \n", buffer);
   error += buffer;
   write(fout, error.c_str(), error.size());
 }
 
 void query_fail_too_long(int const fout, const char * const query_type) {
-  char buffer[256] = "";
+  char buffer[STRING_SIZE] = "";
   std::string error = "";
-  snprintf(buffer, 256, "Query %s failed: query too long \n", query_type);
+  snprintf(buffer, STRING_SIZE, "Query %s failed: query too long \n", query_type);
   printf("%s \n", buffer);
   error += buffer;
   write(fout, error.c_str(), error.size());
 }
 
 void query_fail_bad_filter(int const fout, const char* const field, const char* const filter) {
-  char buffer[256] = "";
+  char buffer[STRING_SIZE] = "";
   std::string error = "";
-  snprintf(buffer, 256, "Query failed bad filter : field = %s, filter = %s \n", field, filter);
+  snprintf(buffer, STRING_SIZE, "Query failed bad filter : field = %s, filter = %s \n", field, filter);
   printf("%s \n", buffer);
   error += buffer;
   write(fout, error.c_str(), error.size());
 }
 
 void query_fail_bad_update(int const fout, const char* const field, const char* const filter) {
-  char buffer[256] = "";
+  char buffer[STRING_SIZE] = "";
   std::string error = "";
-  snprintf(buffer, 256, "Query failed bad update : field = %s, filter = %s \n", field, filter);
+  snprintf(buffer, STRING_SIZE, "Query failed bad update : field = %s, filter = %s \n", field, filter);
   printf("%s \n", buffer);
   error += buffer;
   write(fout, error.c_str(), error.size());

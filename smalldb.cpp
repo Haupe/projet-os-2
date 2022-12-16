@@ -1,3 +1,7 @@
+#define PORT 28772
+#define MAX_ACCEPTATION 45
+#define STRING_SIZE 512
+
 #include <netinet/in.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,19 +18,19 @@
 #include "queries.hpp"
 
 //initialisation des structures
-struct thread_fd{
+struct thread_fd{  // structure contenant les informations liee à un thread
 	pthread_t thread;
 	int fd;
 };
 
-struct QueryMutex{
+struct QueryMutex{  // structure contenant les mutex et un compteur pour la synchronisation
 	pthread_mutex_t new_access=PTHREAD_MUTEX_INITIALIZER ;
 	pthread_mutex_t write_access=PTHREAD_MUTEX_INITIALIZER;
 	pthread_mutex_t reader_registration=PTHREAD_MUTEX_INITIALIZER;
 	int readers_c = 0;
 };
 
-struct Thread_arg{
+struct Thread_arg{ // structure contenant les arguments dont les threads ont besoin
 	QueryMutex *query_mutex;
 	int socket;
 };
@@ -37,11 +41,13 @@ std::vector<thread_fd> thread_list;
 int server_fd;
 
 // definition des prototypes
+void interact_with_clients(sigset_t set, sockaddr_in address, QueryMutex query_mutex);
+
 void reading_error(int socket);
 void writing_error(int socket);
 
-int good_execution(Thread_arg *thread_arg, char* query);
-void *client(Thread_arg* thread_arg);
+int good_execution(Thread_arg *thread_arg, char* query); // fonction lancant l'execution d'une requete prenant en compte la concurrence
+void *client(Thread_arg* thread_arg); // fonction permettant la discussion avec un client via le socket
 
 // les handlers des signals
 void sign_signit(int sig); 
@@ -57,7 +63,7 @@ int main(int argc, char *argv[]) {
   	struct sockaddr_in address;
   	address.sin_family = AF_INET;
   	address.sin_addr.s_addr = INADDR_ANY;
-  	address.sin_port = htons(28772);
+  	address.sin_port = htons(PORT);
 
   	::bind(server_fd, (struct sockaddr *)&address, sizeof(address));
 
@@ -86,22 +92,30 @@ int main(int argc, char *argv[]) {
     sigaddset(&set, SIGUSR1);
 
 
-  	while(1){  // boucle dans laquelle le processus principale boucle pour permettre des connexions
-    	listen(server_fd, 45);
+  	interact_with_clients( set, address, query_mutex);
+  	return 0;
+}
+
+
+void interact_with_clients(sigset_t set, sockaddr_in address, QueryMutex query_mutex){
+	while(1){  // boucle dans laquelle le processus principale boucle pour permettre des connexions
+
+		// ici on accept et attribue a un file descriptor une connexion avec un clien
+    	listen(server_fd, MAX_ACCEPTATION); 
     	size_t addrlen = sizeof(address);
     	int new_socket = accept(server_fd, (struct sockaddr *)&address, (socklen_t *)&addrlen);
 		printf("new client connected (%i)\n", new_socket);
 
-		Thread_arg* thread_arg =new Thread_arg{&query_mutex, new_socket};
+		Thread_arg* thread_arg =new Thread_arg{&query_mutex, new_socket};  
 
 		thread_list.push_back(thread_fd{pthread_t{}, new_socket});
 
-		pthread_sigmask(SIG_BLOCK, &set, NULL);
+		pthread_sigmask(SIG_BLOCK, &set, NULL);  // on mask certains signaux, pour s'assurer que le threads principales les recoivent
 		pthread_create(&thread_list.back().thread, NULL, (void*(*)(void *)) client, (void *)thread_arg);
 		pthread_sigmask(SIG_UNBLOCK, &set, NULL);
 	}
-  	return 0;
 }
+
 
 // ************** fonction d'erreur **************************
 void reading_error(int socket){
@@ -117,7 +131,7 @@ void writing_error(int socket){
 
 // *************** fonction executer par les threads fils *********************************
 
-int good_execution(Thread_arg *thread_arg, char* query) {
+int good_execution(Thread_arg *thread_arg, char* query) { 
 	int result = 0;
 
 	pthread_mutex_lock(&thread_arg->query_mutex->new_access);
@@ -157,23 +171,23 @@ int good_execution(Thread_arg *thread_arg, char* query) {
 
 
 void *client(Thread_arg *thread_arg){
-	char query[256] = "";
-	char end[512] = "~";
-	int lu;
-	while ((lu = read(thread_arg->socket, query, 256))){
-		if (lu == -1){
+	char query[STRING_SIZE] = "";
+	char end[STRING_SIZE] = "~";
+	int lu=0;
+	// boucle pendant laquelle le serveur reçoit des requetes du client et lui envoie le resultat
+	while ((lu = read(thread_arg->socket, query, STRING_SIZE))){ 
+		if (lu == -1){ // cas ou il y a eu une erreur dans le read
 			reading_error(thread_arg->socket);
 			return nullptr;
-		}else if(lu == 2)
+		}else if(lu == 2) // Si la requete est vide on sort simplement de la boucle, ça signifie que le client a fini
 			break;
-		for(int i = lu; i<256; i++){query[i] = 0;}
-		printf("executing :%s \n", query);
+		for(int i = lu; i<STRING_SIZE; i++){query[i] = 0;} // ici on s'assure que le string ne contient rien d'indesirable
 
-		if(good_execution(thread_arg, query)==0){
+		if(good_execution(thread_arg, query)==0){ // le resultat de l'execution est 0, la requete n'est pas bonne
 			query_fail_bad_query_type(thread_arg->socket);
 		}
 
-		if(write(thread_arg->socket, end, 512) == -1){
+		if(write(thread_arg->socket, end, STRING_SIZE) == -1){ // ici on envoie au client le resultat de la requete
 			writing_error(thread_arg->socket);
 			return nullptr;
 		}
