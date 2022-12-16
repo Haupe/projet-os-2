@@ -8,7 +8,7 @@
 #include <string>
 #include <iostream>
 
-std::string lecture(int longueur, char* buffer, int sock);
+std::string lecture(int longueur, int sock);
 
 int main(int argc, char* argv[]) {
   // Permet que write() retourne 0 en cas de réception
@@ -22,40 +22,42 @@ int main(int argc, char* argv[]) {
   serv_addr.sin_port = htons(28772);
 
   // Conversion de string vers IPv4 ou IPv6 en binaire
-  if (argc == 2) {
-   inet_pton(AF_INET, argv[1], &serv_addr.sin_addr);
-  }else
-   inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr);
+   if (argc == 2) {
+      inet_pton(AF_INET, argv[1], &serv_addr.sin_addr);
+   }else{
+      inet_pton(AF_INET, "127.0.0.1", &serv_addr.sin_addr);
+   }
 
   connect(sock, (struct sockaddr *)&serv_addr, sizeof(serv_addr));
 
-  //printf("Your're connected to the database !\nPlease enter a query :\n>");
   
    char buffer[512] = "";
    std::string query="";
-   int longueur, i, ret;
+   int end_index=0;
+   int longueur;
+   bool flag;
+
    while (fgets(buffer, 512, stdin) != NULL) {
       if (!strcmp(buffer, "")){
          break;
       }
       longueur = 512;
       query = buffer;
-      //printf("Envoi...\n");
       if(static_cast<std::string>(query).find("\n")){
          
 			query.erase(query.length()-1);
 		}
-      //printf("here\n");
       write(sock, query.c_str(), strlen(buffer) + 1);
-      i = 0;
       std::string result = "";
-      int counter = 0;
-      while (result.find("~") == std::string::npos) {
-         for(int i=0; i<512; i++ ){buffer[i]=0;}
-         result = lecture(longueur, buffer, sock);
+      flag = true;
+      while (flag) {
+         result = lecture(longueur, sock);
+         if((end_index=result.find("~")) != std::string::npos){
+            result.erase(end_index);
+            flag = false;
+         }
          printf("%s \n", result.c_str());
       }
-      //printf("Recu : %s\n>", result.c_str());
       printf("\n>");
    }
   
@@ -63,10 +65,12 @@ int main(int argc, char* argv[]) {
   return 0;
 }
 
-std::string lecture(int longueur, char* buffer, int sock){
+std::string lecture(int longueur, int sock){
    int ret, i=0;
    std::string result="";
+   char buffer[512] = "";
    while (i < longueur) {
+      for(int i=0; i<512; i++ ){buffer[i]=0;}
       ret = read(sock, buffer, longueur-1);
       result += buffer;
       i += ret;
