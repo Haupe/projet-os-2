@@ -15,7 +15,7 @@ smalldb: smalldb.cpp ${OBJ}
 %.o: %.cpp %.hpp
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $^
 
-.PHONY: client
+.PHONY: sdbsh
 sdbsh: client.cpp 
 	$(CXX) $(LDFLAGS) $^ -o $@ $(LOADLIBES) $(LDLIBS)
 
