@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
    interact(sock);
   
-   //close(sock);
+   close(sock);
    return 0;
 }
 
@@ -54,7 +54,7 @@ void interact(int sock){
    bool flag;  // sert a sortir de la boucle quand il le faut
 
    // Boucle pendant laquelle le client prends des entres de l'utilisateur, l'envoie et imprime la réponse.
-   printf(">");
+   //printf(">");
    while (fgets(buffer, longueur, stdin) != NULL) {  // ici on lit sur l'entree du client
       if (!strcmp(buffer, "\n") || !strcmp(buffer, "") ){ // on verifie si il est vide
          break;
@@ -77,7 +77,7 @@ void interact(int sock){
          }
          printf("%s", result.c_str());
       }
-      printf(">");
+      //printf(">");
    }
 }
 

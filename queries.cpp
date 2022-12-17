@@ -34,7 +34,7 @@ void execute_select(int fout, database_t* const db, const char* const field,
   }
   char puffer[STRING_SIZE]="";
   result = "";
-  snprintf(puffer, STRING_SIZE, "%i student(s) selected \n", i);
+  snprintf(puffer, STRING_SIZE, "%i student(s) selected\n", i);
   result += puffer;
   write(fout, result.c_str(), result.size());
 
@@ -60,7 +60,7 @@ void execute_update(int fout, database_t* const db, const char* const ffield, co
   }
   std::string result = "";
   char buffer[STRING_SIZE] = "";
-  snprintf(buffer, STRING_SIZE, "%i student(s) updated \n", i);
+  snprintf(buffer, STRING_SIZE, "%i student(s) updated\n", i);
   result += buffer;
   write(fout, result.c_str(), result.size());
 }
@@ -99,20 +99,20 @@ void execute_delete(int fout, database_t* const db, const char* const field,
     return;
   }
 
-  char buffer[STRING_SIZE] = ""; 
-  std::string result = "";
+  /* char buffer[STRING_SIZE] = ""; */
+  std::string result = ""; 
   int i=0;
   for (const student_t& s : db->data) {
     if (predicate(s)) {
-      student_to_str(buffer, &s, STRING_SIZE);
+      /* student_to_str(buffer, &s, STRING_SIZE);
       result = buffer;
-      result += "\n";
+      result += "\n"; */
       i ++;
-      write(fout, result.c_str(), result.size());
+      /* write(fout, result.c_str(), result.size()); */
     }
   }
   char puffer[STRING_SIZE] = "";
-  snprintf(puffer, STRING_SIZE, "%i student(s) deleted \n", i);
+  snprintf(puffer, STRING_SIZE, "%i deleted student(s)\n", i);
   result = puffer;
   write(fout, result.c_str(), result.size());
   auto new_end = remove_if(db->data.begin(), db->data.end(), predicate);
