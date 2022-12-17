@@ -99,16 +99,12 @@ void execute_delete(int fout, database_t* const db, const char* const field,
     return;
   }
 
-  /* char buffer[STRING_SIZE] = ""; */
+
   std::string result = ""; 
   int i=0;
   for (const student_t& s : db->data) {
     if (predicate(s)) {
-      /* student_to_str(buffer, &s, STRING_SIZE);
-      result = buffer;
-      result += "\n"; */
       i ++;
-      /* write(fout, result.c_str(), result.size()); */
     }
   }
   char puffer[STRING_SIZE] = "";
