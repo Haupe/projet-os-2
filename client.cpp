@@ -75,7 +75,7 @@ void interact(int sock){
             result.erase(end_index);
             flag = false;
          }
-         printf("%s \n", result.c_str());
+         printf("%s", result.c_str());
       }
       printf(">");
    }

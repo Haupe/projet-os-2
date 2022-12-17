@@ -75,7 +75,6 @@ int main(int argc, char *argv[]) {
 	}
 
 	// ************ redclaration des handlers ********************
-	printf("%i\n", getpid());
 	signal(SIGINT, sign_signit);
 	signal(SIGUSR1, sign_sigusr1);
 
