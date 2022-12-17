@@ -68,6 +68,13 @@ void execute_update(int fout, database_t* const db, const char* const ffield, co
 void execute_insert(int fout, database_t* const db, const char* const fname,
                     const char* const lname, const unsigned id, const char* const section,
                     const tm birthdate) {
+  for(student_t& s : db->data){
+    if (s.id == id){
+      std::string result = "Query failed : id already in database.\n";
+      write(fout,result.c_str(), result.size());
+      return;
+    }
+  }
   db->data.emplace_back();
   student_t *s = &db->data.back();
   s->id = id;
@@ -80,6 +87,7 @@ void execute_insert(int fout, database_t* const db, const char* const fname,
   char buffer[STRING_SIZE] = "";
   student_to_str(buffer, s, STRING_SIZE);
   result += buffer;
+  result += "\n";
   write(fout,result.c_str(), result.size());
 }
 

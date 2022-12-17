@@ -42,7 +42,7 @@ int main(int argc, char* argv[]) {
 
    interact(sock);
   
-   close(sock);
+   //close(sock);
    return 0;
 }
 
@@ -56,7 +56,7 @@ void interact(int sock){
    // Boucle pendant laquelle le client prends des entres de l'utilisateur, l'envoie et imprime la réponse.
    printf(">");
    while (fgets(buffer, longueur, stdin) != NULL) {  // ici on lit sur l'entree du client
-      if (!strcmp(buffer, "")){ // on verifie si il est vide
+      if (!strcmp(buffer, "\n") || !strcmp(buffer, "") ){ // on verifie si il est vide
          break;
       }
 
